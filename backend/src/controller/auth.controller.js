@@ -50,15 +50,10 @@ export const signUp = async (req, res) => {
       });
 
       try {
-        await sendWelcomeEmail(
-          savedUser.email,
-          savedUser.name,
-          ENV.CLIENT_URL
-        );
+        await sendWelcomeEmail(savedUser.email, savedUser.name, ENV.CLIENT_URL);
       } catch (error) {
         console.error("Failed to send welcome email: ", error);
       }
-
     } else {
       res.status(400).json({ message: "Invalid user data" });
     }
@@ -68,9 +63,38 @@ export const signUp = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {};
+export const login = async (req, res) => {
+  const { email, password } = req.body;
 
-export const logOut = async (req, res) => {};
+  try {
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Invalid Credential" });
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect)
+      return res.status(400).json({ message: "Invalid Creadentials" });
+    genrateToken(user._id, res);
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      profilePic: user.profilePic,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error("Error in login controller: ", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const logOut = async (_, res) => {
+  res.cookie("jwt", "", { maxAge: 0 });
+  res.status(200).json({ message: "Logged out successfully." });
+};
 
 export const forgetPassword = async (req, res) => {};
 
