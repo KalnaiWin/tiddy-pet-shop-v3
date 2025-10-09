@@ -1,16 +1,17 @@
 import express from "express";
-import "dotenv/config";
 import path from "path";
 
 import authRoute from "./routes/auth.route.js";
+import { connectDB } from "./lib/db.js";
+import { ENV } from "./lib/env.js";
 
 const app = express();
 
-const port = process.env.PORT || 3000;
+const port = ENV.PORT || 3000;
 
 const __dirname = path.resolve();
 
-if (process.env.NODE_ENV === "production") {
+if (ENV.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
   app.get("/*splat", (_, res) => {
@@ -18,8 +19,17 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
+app.use(express.json());
+
 app.use("/api/auth", authRoute);
 
-app.listen(port, () => {
-  console.log("Listening Port: ", port);
-});
+connectDB()
+  .then(() => {
+    app.listen(port, () => {
+      console.log("Server running on port: ", port);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to connect to the database", err);
+    process.exit(1);
+  });
