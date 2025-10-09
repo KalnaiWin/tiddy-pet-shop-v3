@@ -1,0 +1,77 @@
+import { sendWelcomeEmail } from "../emails/emailHanlders.js";
+import { ENV } from "../lib/env.js";
+import { genrateToken } from "../lib/utils.js";
+import User from "../model/User.js";
+import bcrypt from "bcryptjs";
+
+export const signUp = async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ message: "The length of password should be at least 6." });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    const existUserWithThisEmail = await User.findOne({ email: email });
+    if (existUserWithThisEmail)
+      return res
+        .status(400)
+        .json({ message: "This email has been already used." });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    if (newUser) {
+      const savedUser = await newUser.save();
+      genrateToken(savedUser._id, res);
+      res.status(201).json({
+        _id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        password: newUser.password,
+        profilePic: newUser.profilePic,
+        role: newUser.role,
+      });
+
+      try {
+        await sendWelcomeEmail(
+          savedUser.email,
+          savedUser.name,
+          ENV.CLIENT_URL
+        );
+      } catch (error) {
+        console.error("Failed to send welcome email: ", error);
+      }
+
+    } else {
+      res.status(400).json({ message: "Invalid user data" });
+    }
+  } catch (error) {
+    console.log("Error in signup controller: ", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const login = async (req, res) => {};
+
+export const logOut = async (req, res) => {};
+
+export const forgetPassword = async (req, res) => {};
+
+export const resetPassword = async (req, res) => {};
