@@ -57,3 +57,93 @@ export function welcomeEmailTemplate(name, clientURL) {
 </html>
 `;
 }
+
+export function resetPassword(resetURL) {
+  return `
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Password Reset</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;margin:0;padding:0;display:flex;align-items:center;justify-content:center;height:100vh}
+    .box{background:#fff;padding:28px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.08);max-width:420px;text-align:center}
+    h1{font-size:18px;margin:0 0 10px}
+    p{color:#555;margin:0 0 18px}
+    .btn{display:inline-block;padding:12px 20px;border-radius:6px;text-decoration:none;background:#1d72ff;color:#fff;font-weight:600}
+    .note{font-size:13px;color:#888;margin-top:12px}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Reset your password</h1>
+    <p>Press the button below to open the password reset page.</p>
+
+    <a class="btn" href="${resetURL}">Reset password</a>
+
+    <div class="note">If the button doesn't work, copy & paste the reset link into your browser.</div>
+  </div>
+</body>
+</html>
+
+  `;
+}
+
+export function changePasswordSuccessfully() {
+  return `
+  <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reset password successfully</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f4f6f8;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #222;
+    }
+    .card {
+      background: #fff;
+      padding: 28px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+    }
+    h1 { margin: 0 0 10px; font-size: 20px; }
+    p { margin: 0 0 18px; color: #555; }
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 600;
+    }
+    .hint { margin-top: 12px; font-size: 13px; color: #888; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Reset password successfully</h1>
+    <p>Your password has been updated. You can now sign in with your new password.</p>
+
+    <!-- Replace __LOGIN_URL__ with your real login URL on the server -->
+    <a class="btn" href="__LOGIN_URL__">Go to sign in</a>
+
+    <div class="hint">If the button doesn't work, navigate to your app's login page manually.</div>
+  </div>
+</body>
+</html>
+
+  `;
+}
