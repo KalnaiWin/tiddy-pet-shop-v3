@@ -26,7 +26,7 @@ export const sendEmailResetPassword = async (email, resetURL) => {
     from: `${sender.name} <${sender.email}>`,
     to: email,
     subject: `Reset password`,
-    html: resetPassword.replace("{resetURL}", resetURL),
+    html: resetPassword(resetURL),
   });
 
   if (error) {
@@ -42,7 +42,7 @@ export const ResetPasswordSuccessfully = async (email) => {
     from: `${sender.name} <${sender.email}>`,
     to: email,
     subject: `Password reset successfully`,
-    html: changePasswordSuccessfully,
+    html: changePasswordSuccessfully(),
   });
 
   if (error) {

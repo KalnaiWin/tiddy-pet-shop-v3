@@ -7,7 +7,9 @@ export const HomePage = () => {
   return (
     <div>
       HomePage
-      <button onClick={logout}>Log Out</button>
+      <button onClick={logout} className="bg-amber-700 p-5 rounded-md">
+        Log Out
+      </button>
     </div>
   );
 };
