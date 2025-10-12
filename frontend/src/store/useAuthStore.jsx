@@ -7,6 +7,8 @@ export const useAuthStore = create((set) => ({
   isCheckingAuth: false,
   isLoggingIn: false,
   isSignUp: false,
+  isSendingResetPassword: false,
+  isChangingPassword: false,
 
   checkAuth: async () => {
     try {
@@ -25,7 +27,7 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.post("/auth/signup", data);
       set({ authUser: res.data });
-      toast.success("Account created successfully");
+      toast.success("Đã tạo tài khoản thành công");
     } catch (error) {
       toast.error(error.response.data.message);
     } finally {
@@ -38,7 +40,7 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
-      toast.success("Logged successfully");
+      toast.success("Chào mừng bạn đã tới");
     } catch (error) {
       toast.error(error.response.data.message);
     } finally {
@@ -49,7 +51,7 @@ export const useAuthStore = create((set) => ({
   logout: async () => {
     try {
       await axiosInstance.post("/auth/logout");
-      toast.success("Log out successfully");
+      toast.success("Đăng xuất thành công");
       set({ authUser: null });
     } catch (error) {
       toast.error("Logout failed");
@@ -60,13 +62,41 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.put("/auth/update-profile", data);
       set({ authUser: res.data });
-      toast.success("Profile updated successfully");
+      toast.success("Đổi ảnh thành công");
     } catch (error) {
       console.error(
         "Update profile error:",
         error.response?.data || error.message
       );
       toast.error("Updated failed");
+    }
+  },
+
+  forgetPassword: async (data) => {
+    set({ isSendingResetPassword: true });
+    try {
+      await axiosInstance.post("/auth/forget-password", data);
+      toast("Đã gửi link đổi mật khẩu vào gmail của bạn.");
+    } catch (error) {
+      console.error("Error at frontend ForgetPassword: ", error);
+      toast.error("Gửi không thành công");
+    } finally {
+      set({ isSendingResetPassword: false });
+    }
+  },
+
+  resetPassword: async (token, password) => {
+    set({ isChangingPassword: true });
+    try {
+      await axiosInstance.post(`/auth/reset-password/${token}`, {
+        password,
+      });
+      toast.success("Đổi mật khẩu thành công");
+    } catch (error) {
+      console.error("Error at frontend ResetPassword: ", error);
+      toast.error("Đổi mật khẩu không thành công");
+    } finally {
+      set({ isChangingPassword: false });
     }
   },
 }));

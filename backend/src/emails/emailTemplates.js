@@ -138,7 +138,7 @@ export function changePasswordSuccessfully() {
     <p>Your password has been updated. You can now sign in with your new password.</p>
 
     <!-- Replace __LOGIN_URL__ with your real login URL on the server -->
-    <a class="btn" href="__LOGIN_URL__">Go to sign in</a>
+    <a class="btn" href="http://localhost:5173/login">Go to login in</a>
 
     <div class="hint">If the button doesn't work, navigate to your app's login page manually.</div>
   </div>

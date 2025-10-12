@@ -1,11 +1,13 @@
 import { Navigate, Route, Routes } from "react-router";
 import { HomePage } from "./pages/HomePage";
-import { LoginPage } from "./pages/LoginPage";
-import { SignUpPage } from "./pages/SignUpPage";
+import { LoginPage } from "./pages/auth/LoginPage";
+import { SignUpPage } from "./pages/auth/SignUpPage";
 import { useEffect } from "react";
-import { useAuthStore } from "./store/useAuthStore";
 import { LoadingPage } from "./components/LoadingPage";
-import { ForgetPassword } from "./pages/ForgetPassword";
+import { ForgetPassword } from "./pages/auth/ForgetPassword";
+import { ResetPassword } from "./pages/auth/ResetPassword";
+import { useAuthStore } from "./store/useAuthStore";
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { checkAuth, isCheckingAuth, authUser } = useAuthStore();
@@ -31,8 +33,16 @@ const App = () => {
           path="/signup"
           element={!authUser ? <SignUpPage /> : <Navigate to={"/"} />}
         />
-        <Route path="/forget-password" element={<ForgetPassword />} />
+        <Route
+          path="/forget-password"
+          element={!authUser ? <ForgetPassword /> : <Navigate to={"/"} />}
+        />
+        <Route
+          path="/reset-password/:token"
+          element={!authUser ? <ResetPassword /> : <Navigate to="/" />}
+        />
       </Routes>
+      <Toaster />
     </div>
   );
 };

@@ -1,21 +1,20 @@
 import { useState } from "react";
-import { useAuthStore } from "../store/useAuthStore";
-import { InfoShop, IntroduceList } from "../data/DataList";
+import { useAuthStore } from "../../store/useAuthStore";
+import { InfoShop, IntroduceList } from "../../data/DataList";
 import { Loader, Lock, MailsIcon } from "lucide-react";
 
-export const SignUpPage = () => {
+export const LoginPage = () => {
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
   });
 
-  const { signup, isSignUp } = useAuthStore();
+  const { login, isLoggingIn } = useAuthStore();
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    signup(formData);
+    login(formData);
   };
 
   return (
@@ -84,27 +83,9 @@ export const SignUpPage = () => {
           className="absolute-center text-base-content border-2 p-10 rounded-md w-2/3"
         >
           {/* Title */}
-          <h1 className="font-bold text-4xl mb-3 w-full flex justify-center">
-            Đăng Kí
+          <h1 className="font-bold text-4xl mb-3 flex justify-center">
+            Đăng nhập
           </h1>
-          <div className="flex flex-col gap-2 my-4">
-            <label htmlFor="">Tên tài khoản</label>
-            <div className="relative w-full">
-              <MailsIcon className="text-base-content absolute top-2 left-2" />
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    name: e.target.value,
-                  })
-                }
-                className="w-full bg-base-200 focus:outline-accent rounded-md border-1 border-base-content p-2 indent-8"
-                placeholder="Nhập tên"
-              />
-            </div>
-          </div>
           <div className="flex flex-col gap-2 my-4">
             <label htmlFor="">Email</label>
             <div className="relative w-full">
@@ -124,7 +105,15 @@ export const SignUpPage = () => {
             </div>
           </div>
           <div className="flex flex-col gap-2 my-4">
-            <label htmlFor="">Mật khẩu</label>
+            <label htmlFor="" className="w-full flex justify-between">
+              <p>Mật khẩu</p>
+              <a
+                href="/forget-password"
+                className="text-sm italic underline opacity-70"
+              >
+                Quên mật khẩu?
+              </a>
+            </label>
             <div className="relative w-full">
               <Lock className="text-base-content absolute top-2 left-2" />
               <input
@@ -141,24 +130,24 @@ export const SignUpPage = () => {
               />
             </div>
           </div>
-          <a href="/login" className="text-sm italic underline opacity-70">
-            Đã có tài khoản?
+          <a href="/signup" className="text-sm italic underline opacity-70">
+            Chưa có tài khoản?
           </a>
           <div className="w-full mt-5">
-            {isSignUp ? (
+            {isLoggingIn ? (
               <button
                 className="flex gap-2 bg-base-content text-base-100 p-2 w-full rounded-md font-medium justify-center opacity-40"
                 disabled
               >
                 <Loader className="animate-spin" />
-                <p>Đang tạo...</p>
+                <p>Đang đăng nhập...</p>
               </button>
             ) : (
               <button
                 className="bg-base-content text-base-100 p-2 w-full rounded-md font-medium"
                 type="submit"
               >
-                Tạo tài khoản
+                Đăng nhập
               </button>
             )}
           </div>
