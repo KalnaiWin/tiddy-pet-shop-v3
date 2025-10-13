@@ -29,7 +29,6 @@ export const ResetPassword = () => {
       toast.success("Đổi mật khẩu thành công!");
       navigate("/login");
     }
-
   };
 
   return (
