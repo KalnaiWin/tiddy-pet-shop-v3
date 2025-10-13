@@ -41,3 +41,46 @@ export const InfoShop = [
     link: "www/.linktosomwhere",
   },
 ];
+
+export const NavBarList = [
+  {
+    name: "Trang chủ",
+    link: "/",
+  },
+  {
+    name: "Sản phẩm",
+    link: "/product",
+  },
+  {
+    name: "Liên lạc",
+    link: "/contact",
+  },
+];
+
+export const CategoryListHomePgae = [
+  {
+    href: "/images/health.jpeg",
+    name: "Chăm sóc sức khoẻ",
+    link: "/product/health-care",
+  },
+  {
+    href: "/images/beauty.jpg",
+    name: "Làm đẹp cho thú cưng",
+    link: "/product/beauty",
+  },
+  {
+    href: "/images/eatfood.jpg",
+    name: "Thức ăn cho thú cưng",
+    link: "/product/food",
+  },
+  {
+    href: "/images/shower.jpg",
+    name: "Vệ sinh cho thú cưng",
+    link: "/product/hygience",
+  },
+  {
+    href: "/images/accessory.jpg",
+    name: "Phụ kiện cho thú cưng",
+    link: "/product/accessory",
+  },
+];
