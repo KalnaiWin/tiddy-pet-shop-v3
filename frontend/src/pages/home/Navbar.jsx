@@ -2,8 +2,6 @@ import { Link } from "react-router";
 import { NavBarList } from "../../data/DataList";
 import { useAuthStore } from "../../store/useAuthStore";
 import { LogIn, LogOut } from "lucide-react";
-import { DashboardAdmin } from "../admin/DashboardAdmin";
-import { ProfileUser } from "../ProfileUser";
 import { NavLink } from "react-router";
 
 export const Navbar = () => {
@@ -32,11 +30,11 @@ export const Navbar = () => {
         {authUser ? (
           authUser.role === "admin" ? (
             <Link to={"/dashboard"}>
-              <DashboardAdmin />
+              Dashboard
             </Link>
           ) : (
             <Link to={"/profile"}>
-              <ProfileUser />
+              Profile
             </Link>
           )
         ) : (

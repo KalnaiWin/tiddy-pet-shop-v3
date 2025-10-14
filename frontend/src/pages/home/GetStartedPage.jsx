@@ -16,7 +16,7 @@ export const GetStartedPage = () => {
       </p>
       <div className="flex justify-center items-center mt-5 gap-5">
         <button className="p-2 bg-base-content text-base-100 rounded-md hover:opacity-50 transition-all duration-300">
-          <Link to={"/product"}>Go Shopping</Link>
+          <Link to={"/product/all"}>Go Shopping</Link>
         </button>
         {authUser ? (
           <button className="p-2 border-2 rounded-md hover:opacity-50 transition-all duration-300">

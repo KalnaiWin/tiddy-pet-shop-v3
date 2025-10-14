@@ -23,8 +23,11 @@ export const signUp = async (req, res) => {
         .json({ message: "The length of password should be at least 6." });
     }
 
+    const adminEmails = ENV.ADMIN_EMAILS.split(",");
+    const role = adminEmails.includes(email) ? "admin" : "user";
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(email) && role === "user") {
       return res.status(400).json({ message: "Invalid email format" });
     }
 
@@ -41,6 +44,7 @@ export const signUp = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      role,
     });
 
     if (newUser) {

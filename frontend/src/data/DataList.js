@@ -1,3 +1,12 @@
+import {
+  BarChart,
+  Megaphone,
+  MessageSquare,
+  Package,
+  Truck,
+  Users,
+} from "lucide-react";
+
 export const IntroduceList = [
   {
     icon: "/assets/plan.png",
@@ -87,5 +96,44 @@ export const CategoryListHomePgae = [
     href: "/images/accessory.jpg",
     name: "Khác",
     link: "/product/category/other",
+  },
+];
+
+export const NavBarAdminList = [
+  {
+    icon: BarChart,
+    color: "text-indigo-500",
+    name: "Thông số chung",
+    link: "/dashboard",
+  },
+  {
+    icon: Package,
+    color: "text-emerald-500",
+    name: "Quản lý sản phẩm",
+    link: "/dashboard/product",
+  },
+  {
+    icon: Users,
+    color: "text-purple-500",
+    name: "Thông tin người dùng",
+    link: "/dashboard/user",
+  },
+  {
+    icon: Truck,
+    color: "text-orange-500",
+    name: "Quá trình giao hàng",
+    link: "/dashboard/order",
+  },
+  {
+    icon: MessageSquare,
+    color: "text-teal-500",
+    name: "Tin nhắn từ khách hàng",
+    link: "/dashboard/message",
+  },
+  {
+    icon: Megaphone,
+    color: "text-rose-500",
+    name: "Quảng cáo",
+    link: "/dashboard/advertise",
   },
 ];
