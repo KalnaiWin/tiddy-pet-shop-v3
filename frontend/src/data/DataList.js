@@ -49,7 +49,7 @@ export const NavBarList = [
   },
   {
     name: "Sản phẩm",
-    link: "/product",
+    link: "/product/all",
   },
   {
     name: "Liên lạc",
