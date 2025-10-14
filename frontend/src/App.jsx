@@ -13,6 +13,13 @@ import { DashboardAdmin } from "./pages/admin/DashboardAdmin";
 import { ProductPage } from "./pages/ProductPage";
 import { ContactPage } from "./pages/ContactPage";
 import { MainLayout } from "./layouts/MainLayout";
+import { AdminLayout } from "./layouts/AdminLayout";
+import { ProductManage } from "./pages/admin/ProductManage";
+import { ProtectedAdminRoute } from "./components/ProtectedAdminRoute";
+import { UsersManage } from "./pages/admin/UsersManage";
+import { OrderManage } from "./pages/admin/OrderManage";
+import { MessageCustomer } from "./pages/admin/MessageCustomer";
+import { Advertisement } from "./pages/admin/Advertisement";
 
 const App = () => {
   const { checkAuth, isCheckingAuth, authUser } = useAuthStore();
@@ -26,40 +33,46 @@ const App = () => {
   return (
     <div data-theme="caramellatte" className="h-screen bg-base-100">
       <Routes>
+        <Route
+          path="/login"
+          element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
+        />
+        <Route
+          path="/signup"
+          element={!authUser ? <SignUpPage /> : <Navigate to={"/"} />}
+        />
+        <Route
+          path="/forget-password"
+          element={!authUser ? <ForgetPassword /> : <Navigate to={"/"} />}
+        />
+        <Route
+          path="/reset-password/:token"
+          element={!authUser ? <ResetPassword /> : <Navigate to="/" />}
+        />
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />
-          <Route
-            path="/login"
-            element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
-          />
-          <Route
-            path="/signup"
-            element={!authUser ? <SignUpPage /> : <Navigate to={"/"} />}
-          />
-          <Route
-            path="/forget-password"
-            element={!authUser ? <ForgetPassword /> : <Navigate to={"/"} />}
-          />
-          <Route
-            path="/reset-password/:token"
-            element={!authUser ? <ResetPassword /> : <Navigate to="/" />}
-          />
           <Route
             path="/profile"
             element={authUser ? <ProfileUser /> : <Navigate to="/" />}
           />
-          <Route
-            path="/dashboard"
-            element={
-              authUser && authUser.role !== "admin" ? (
-                <DashboardAdmin />
-              ) : (
-                <Navigate to="/" />
-              )
-            }
-          />
-          <Route path="/product/:path" element={<ProductPage />} />
+
+          <Route path="/product/:product" element={<ProductPage />} />
           <Route path="/contact" element={<ContactPage />} />
+        </Route>
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedAdminRoute authUser={authUser}>
+              <AdminLayout />
+            </ProtectedAdminRoute>
+          }
+        >
+          <Route index element={<DashboardAdmin />} />
+          <Route path="/dashboard/product" element={<ProductManage />} />
+          <Route path="/dashboard/user" element={<UsersManage />} />
+          <Route path="/dashboard/order" element={<OrderManage />} />
+          <Route path="/dashboard/message" element={<MessageCustomer />} />
+          <Route path="/dashboard/advertise" element={<Advertisement />} />
         </Route>
       </Routes>
       <Toaster />

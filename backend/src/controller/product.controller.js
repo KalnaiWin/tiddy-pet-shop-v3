@@ -1,6 +1,5 @@
 import cloudinary from "../lib/cloudinary.js";
 import Product from "../model/Product.js";
-import slugify from "slugify";
 
 export const getAllProducts = async (_, res) => {
   try {
