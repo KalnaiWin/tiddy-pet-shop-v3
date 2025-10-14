@@ -1,5 +1,6 @@
 import cloudinary from "../lib/cloudinary.js";
 import Product from "../model/Product.js";
+import slugify from "slugify";
 
 export const getAllProducts = async (_, res) => {
   try {
@@ -8,6 +9,63 @@ export const getAllProducts = async (_, res) => {
   } catch (error) {
     console.error("Error at getAllProucts: ", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getProductByCategory = async (req, res) => {
+  const { category } = req.params;
+  console.log("req.params.category:", category);
+
+  let pathCategory = null;
+  switch (category) {
+    case "health-care":
+      pathCategory = "Chăm sóc sức khoẻ";
+      break;
+    case "beauty":
+      pathCategory = "Làm đẹp cho thú cưng";
+      break;
+    case "food":
+      pathCategory = "Thức ăn cho thú cưng";
+      break;
+    case "hygience":
+      pathCategory = "Vệ sinh cho thú cưng";
+      break;
+    case "accessory":
+      pathCategory = "Phụ kiện cho thú cưng";
+      break;
+    default:
+      pathCategory = "Khác";
+      break;
+  }
+
+  console.log("Query category:", pathCategory);
+
+  try {
+    const productCategory = await Product.find({ category: pathCategory });
+    if (!productCategory) {
+      return res
+        .status(404)
+        .json({ message: "No products found in this category" });
+    }
+    res.status(200).json(productCategory);
+  } catch (error) {
+    console.error("Error fetching product by category:", error);
+    res.status(500).json({ message: "Internal Server Error", error });
+  }
+};
+
+export const getProduct = async (req, res) => {
+  const { id: productId } = req.params;
+
+  try {
+    const product = await Product.findById(productId);
+    if (!product)
+      return res.status(404).json({ message: "This product is not exist" });
+
+    return res.status(200).json(product);
+  } catch (error) {
+    console.error("Error finding product:", error);
+    res.status(500).json({ message: "Internal Server Error", error });
   }
 };
 
@@ -144,5 +202,3 @@ export const editProduct = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-export const getProductByCategory = async (req, res) => {};
