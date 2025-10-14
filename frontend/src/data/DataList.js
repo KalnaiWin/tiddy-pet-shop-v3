@@ -61,26 +61,31 @@ export const CategoryListHomePgae = [
   {
     href: "/images/health.jpeg",
     name: "Chăm sóc sức khoẻ",
-    link: "/product/health-care",
+    link: "/product/category/health-care",
   },
   {
     href: "/images/beauty.jpg",
     name: "Làm đẹp cho thú cưng",
-    link: "/product/beauty",
+    link: "/product/category/beauty",
   },
   {
     href: "/images/eatfood.jpg",
     name: "Thức ăn cho thú cưng",
-    link: "/product/food",
+    link: "/product/category/food",
   },
   {
     href: "/images/shower.jpg",
     name: "Vệ sinh cho thú cưng",
-    link: "/product/hygience",
+    link: "/product/category/hygience",
   },
   {
     href: "/images/accessory.jpg",
     name: "Phụ kiện cho thú cưng",
-    link: "/product/accessory",
+    link: "/product/category/accessory",
+  },
+  {
+    href: "/images/accessory.jpg",
+    name: "Khác",
+    link: "/product/category/other",
   },
 ];
