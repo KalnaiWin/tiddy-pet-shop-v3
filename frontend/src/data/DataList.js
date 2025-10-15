@@ -1,8 +1,13 @@
 import {
   BarChart,
+  Blocks,
+  Bubbles,
+  HeartPlus,
   Megaphone,
   MessageSquare,
+  Milk,
   Package,
+  SoapDispenserDroplet,
   Truck,
   Users,
 } from "lucide-react";
@@ -135,5 +140,48 @@ export const NavBarAdminList = [
     color: "text-rose-500",
     name: "Quảng cáo",
     link: "/dashboard/advertise",
+  },
+];
+
+export const TotalCategory = [
+  {
+    name: "Chăm sóc sức khoẻ",
+    link: "health-care",
+    icon: HeartPlus,
+    color: "#EF4444",
+    bg: "bg-[#fab4b4]",
+    bg1: "text-[#ff0000]",
+  },
+  {
+    name: "Làm đẹp cho thú cưng",
+    link: "beauty",
+    icon: Bubbles,
+    color: "#EC4899",
+    bg: "bg-[#f8b7d8]",
+    bg1: "text-[#ff0080]",
+  },
+  {
+    name: "Thức ăn cho thú cưng",
+    link: "food",
+    icon: Milk,
+    color: "#fcc15c",
+    bg: "bg-[#fcdaa1]",
+    bg1: "text-[#ffa200]",
+  },
+  {
+    name: "Vệ sinh cho thú cưng",
+    link: "hygience",
+    icon: SoapDispenserDroplet,
+    color: "#3B82F6",
+    bg: "bg-[#9bc1ff]",
+    bg1: "text-[#0062ff]",
+  },
+  {
+    name: "Phụ kiện cho thú cưng",
+    link: "accessory",
+    icon: Blocks,
+    color: "#10B981",
+    bg: "bg-[#9fffdf]",
+    bg1: "text-[#009966]",
   },
 ];

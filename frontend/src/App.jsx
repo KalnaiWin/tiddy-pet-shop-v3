@@ -20,6 +20,7 @@ import { UsersManage } from "./pages/admin/UsersManage";
 import { OrderManage } from "./pages/admin/OrderManage";
 import { MessageCustomer } from "./pages/admin/MessageCustomer";
 import { Advertisement } from "./pages/admin/Advertisement";
+import { CreateProduct } from "./pages/admin/CreateProduct";
 
 const App = () => {
   const { checkAuth, isCheckingAuth, authUser } = useAuthStore();
@@ -73,6 +74,7 @@ const App = () => {
           <Route path="/dashboard/order" element={<OrderManage />} />
           <Route path="/dashboard/message" element={<MessageCustomer />} />
           <Route path="/dashboard/advertise" element={<Advertisement />} />
+          <Route path="/dashboard/product/create" element={<CreateProduct />} />
         </Route>
       </Routes>
       <Toaster />
