@@ -82,6 +82,8 @@ export const createProduct = async (req, res) => {
     category,
   } = req.body;
 
+  console.log(req.body);
+
   try {
     if (!name || !description || !toPrice || !total) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -91,11 +93,13 @@ export const createProduct = async (req, res) => {
       return res.status(400).json({ message: "Images are required" });
     }
 
+    // Upload main images
     const imageUrls = await Promise.all(
       image.map(async (img) => {
         try {
           const result = await cloudinary.uploader.upload(img, {
             folder: "products",
+            timeout: 180000,
           });
           return result.secure_url;
         } catch (err) {
@@ -104,6 +108,28 @@ export const createProduct = async (req, res) => {
         }
       })
     );
+
+    // upload image for type
+    let typeWithImages = [];
+    if (Array.isArray(type) && type.length > 0) {
+      typeWithImages = await Promise.all(
+        type.map(async (t) => {
+          if (t.image) {
+            const result = await cloudinary.uploader.upload(t.image, {
+              folder: "products/type",
+              timeout: 180000,
+            });
+            return {
+              price: t.price,
+              types: t.types,
+              image: result.secure_url,
+            };
+          } else {
+            throw new Error("Each type must have an image");
+          }
+        })
+      );
+    }
 
     const newProduct = new Product({
       name,
@@ -114,7 +140,7 @@ export const createProduct = async (req, res) => {
       total,
       status,
       discount,
-      type,
+      type: typeWithImages,
       category,
     });
 

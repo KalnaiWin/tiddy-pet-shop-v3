@@ -10,6 +10,10 @@ const productTypes = new mongoose.Schema({
     type: String,
     required: true,
   },
+  image: {
+    type: String,
+    required: true,
+  },
 });
 
 const productSchema = new mongoose.Schema(
@@ -48,7 +52,6 @@ const productSchema = new mongoose.Schema(
         "Khác",
       ],
       default: "Khác",
-      required: true,
     },
     rate: [
       {
@@ -72,7 +75,7 @@ const productSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["available", "out of stock"],
+      enum: ["available", "outofstock"],
       default: "available",
     },
     discount: {
