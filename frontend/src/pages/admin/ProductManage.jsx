@@ -1,4 +1,4 @@
-import { CirclePlus, Package2Icon } from "lucide-react";
+import { CirclePlus } from "lucide-react";
 import { TotalCategory } from "../../data/DataList";
 import { Link } from "react-router";
 

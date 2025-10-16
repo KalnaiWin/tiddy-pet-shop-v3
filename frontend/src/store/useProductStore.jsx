@@ -5,6 +5,7 @@ import { axiosInstance } from "../lib/axios";
 export const useProductStore = create((set) => ({
   allProduct: null,
   isLoadingProduct: false,
+  isCreatingProduct: false,
 
   getAllProduct: async () => {
     set({ isLoadingProduct: true });
@@ -19,6 +20,17 @@ export const useProductStore = create((set) => ({
     }
   },
 
-  
-
+  createProduct: async (data) => {
+    set({ isCreatingProduct: true });
+    try {
+      const res = await axiosInstance.post("/product/create", data);
+      set({ allProduct: res.data });
+      toast.success("Thêm sản phẩm mới thành công");
+    } catch (error) {
+      console.error("Error in creatong product frontend", error);
+      toast.error(error.response?.data?.message || "Không thể tạo sản phẩm");
+    } finally {
+      set({ isCreatingProduct: false });
+    }
+  },
 }));
