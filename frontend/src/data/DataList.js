@@ -6,6 +6,7 @@ import {
   Megaphone,
   MessageSquare,
   Milk,
+  MoreHorizontal,
   Package,
   SoapDispenserDroplet,
   Truck,
@@ -146,7 +147,7 @@ export const NavBarAdminList = [
 export const TotalCategory = [
   {
     name: "Chăm sóc sức khoẻ",
-    link: "health-care",
+    link: "Chăm sóc sức khoẻ",
     icon: HeartPlus,
     color: "#EF4444",
     bg: "bg-[#fab4b4]",
@@ -154,7 +155,7 @@ export const TotalCategory = [
   },
   {
     name: "Làm đẹp cho thú cưng",
-    link: "beauty",
+    link: "Làm đẹp cho thú cưng",
     icon: Bubbles,
     color: "#EC4899",
     bg: "bg-[#f8b7d8]",
@@ -162,7 +163,7 @@ export const TotalCategory = [
   },
   {
     name: "Thức ăn cho thú cưng",
-    link: "food",
+    link: "Thức ăn cho thú cưng",
     icon: Milk,
     color: "#fcc15c",
     bg: "bg-[#fcdaa1]",
@@ -170,7 +171,7 @@ export const TotalCategory = [
   },
   {
     name: "Vệ sinh cho thú cưng",
-    link: "hygience",
+    link: "Vệ sinh cho thú cưng",
     icon: SoapDispenserDroplet,
     color: "#3B82F6",
     bg: "bg-[#9bc1ff]",
@@ -178,10 +179,18 @@ export const TotalCategory = [
   },
   {
     name: "Phụ kiện cho thú cưng",
-    link: "accessory",
+    link: "Phụ kiện cho thú cưng",
     icon: Blocks,
     color: "#10B981",
     bg: "bg-[#9fffdf]",
     bg1: "text-[#009966]",
+  },
+  {
+    name: "Các sản phẩm khác",
+    link: "Khác",
+    icon: MoreHorizontal,
+    color: "#676767",
+    bg: "bg-[#a5a5a5]",
+    bg1: "text-[#000000]",
   },
 ];

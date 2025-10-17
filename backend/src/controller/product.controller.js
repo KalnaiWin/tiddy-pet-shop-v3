@@ -74,60 +74,77 @@ export const createProduct = async (req, res) => {
     description,
     fromPrice,
     toPrice,
-    image,
     total,
     status,
     discount,
-    type,
     category,
   } = req.body;
-
-  console.log(req.body);
 
   try {
     if (!name || !description || !toPrice || !total) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    if (!Array.isArray(image) || image.length === 0) {
-      return res.status(400).json({ message: "Images are required" });
+    const productImages = req.files?.image || [];
+    const typeImages = req.files?.typeImages || [];
+
+    const uploadToCloudinary = (buffer, folder) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result.secure_url);
+          }
+        );
+        stream.end(buffer);
+      });
+    };
+
+    let imageUrls = [];
+
+    if (productImages.length > 0) {
+      imageUrls = await Promise.all(
+        productImages.map((file) => uploadToCloudinary(file.buffer, "products"))
+      );
+    } else if (req.body.image) {
+      imageUrls = Array.isArray(req.body.image)
+        ? req.body.image
+        : [req.body.image];
+    } else {
+      return res.status(400).json({ message: "Product images are required" });
     }
 
-    // Upload main images
-    const imageUrls = await Promise.all(
-      image.map(async (img) => {
-        try {
-          const result = await cloudinary.uploader.upload(img, {
-            folder: "products",
-            timeout: 180000,
-          });
-          return result.secure_url;
-        } catch (err) {
-          console.error("Cloudinary upload error:", err);
-          throw new Error("Image upload failed");
-        }
-      })
-    );
+    const parsedTypes = [];
+    if (req.body["type[0][price]"] || (req.body.type && req.body.type.length)) {
+      const typeUploadPromises = typeImages.map(async (file, i) => {
+        const price = req.body[`type[${i}][price]`];
+        const types = req.body[`type[${i}][types]`];
+        const imageUrl = await uploadToCloudinary(file.buffer, "products/type");
 
-    // upload image for type
-    let typeWithImages = [];
-    if (Array.isArray(type) && type.length > 0) {
-      typeWithImages = await Promise.all(
-        type.map(async (t) => {
+        return {
+          price,
+          types,
+          image: imageUrl,
+        };
+      });
+
+      const typeUrlsFromBody = [];
+      if (req.body.type && typeof req.body.type === "object") {
+        for (const t of req.body.type) {
           if (t.image) {
-            const result = await cloudinary.uploader.upload(t.image, {
-              folder: "products/type",
-              timeout: 180000,
-            });
-            return {
+            typeUrlsFromBody.push({
               price: t.price,
               types: t.types,
-              image: result.secure_url,
-            };
-          } else {
-            throw new Error("Each type must have an image");
+              image: t.image,
+            });
           }
-        })
+        }
+      }
+
+      parsedTypes.push(
+        ...(await Promise.all(typeUploadPromises)),
+        ...typeUrlsFromBody
       );
     }
 
@@ -140,7 +157,7 @@ export const createProduct = async (req, res) => {
       total,
       status,
       discount,
-      type: typeWithImages,
+      type: parsedTypes,
       category,
     });
 

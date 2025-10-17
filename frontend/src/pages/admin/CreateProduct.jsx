@@ -1,8 +1,11 @@
 import { useRef, useState } from "react";
 import { ArrowBigUp, CirclePlus, Loader2, XIcon } from "lucide-react";
 import { useProductStore } from "../../store/useProductStore";
+import { useNavigate } from "react-router";
 
 export const CreateProduct = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -28,40 +31,31 @@ export const CreateProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const base64Images = await Promise.all(
-      formData.image.map((file) => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = (error) => reject(error);
-        });
-      })
-    );
+    // Prepare FormData
+    const form = new FormData();
+    form.append("name", formData.name);
+    form.append("description", formData.description);
+    form.append("fromPrice", formData.fromPrice);
+    form.append("toPrice", formData.toPrice);
+    form.append("total", formData.total);
+    form.append("status", formData.status);
+    form.append("discount", formData.discount);
+    form.append("category", formData.category);
 
-    const typeWithBase64 = await Promise.all(
-      formData.type.map(async (t) => {
-        if (t.image) {
-          const base64 = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(t.image);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = (error) => reject(error);
-          });
-          return { ...t, image: base64 };
-        }
-        return t;
-      })
-    );
+    formData.image.forEach((file) => {
+      form.append("image", file);
+    });
 
-    const dataToSend = {
-      ...formData,
-      image: base64Images,
-      type: typeWithBase64,
-    };
+    formData.type.forEach((t, index) => {
+      form.append(`type[${index}][price]`, t.price);
+      form.append(`type[${index}][types]`, t.types);
+      if (t.image) {
+        form.append("typeImages", t.image);
+      }
+    });
 
-    const success = await createProduct(dataToSend);
-    //  reset
+    const success = await createProduct(form);
+
     if (success) {
       setFormData({
         name: "",
@@ -70,15 +64,17 @@ export const CreateProduct = () => {
         toPrice: 0,
         image: [],
         total: "",
-        status: "",
+        status: "available",
         discount: "",
         type: [{ price: 0, types: "", image: null }],
-        category: "",
+        category: "Khác",
       });
 
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+
+      navigate("/dashboard/product");
     }
   };
 
@@ -178,7 +174,6 @@ export const CreateProduct = () => {
               onChange={(e) =>
                 setFormData({ ...formData, status: e.target.value })
               }
-              defaultValue={"available"}
               className="bg-base-200 rounded-md border-2 border-base-content indent-1 p-1 focus:outline-base-300"
             >
               <option value="available">Còn hàng</option>
@@ -291,7 +286,6 @@ export const CreateProduct = () => {
             onChange={(e) =>
               setFormData({ ...formData, category: e.target.value })
             }
-            defaultValue={"Khác"}
             className="bg-base-200 rounded-md border-2 border-base-content indent-1 p-1 focus:outline-base-300"
           >
             <option value="Chăm sóc sức khoẻ">Chăm sóc sức khoẻ</option>
