@@ -7,4 +7,3 @@ export const axiosInstance = axios.create({
       : "/api",
   withCredentials: true,
 });
-
