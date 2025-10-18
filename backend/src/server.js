@@ -23,7 +23,6 @@ if (ENV.NODE_ENV === "production") {
 }
 
 app.use(express.json({ limit: "25mb" }));
-console.log("🚀 CLIENT_URL loaded from env:", ENV.CLIENT_URL);
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 app.use(cookieParser());
 
