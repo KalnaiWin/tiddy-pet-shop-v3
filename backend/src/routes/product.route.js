@@ -19,7 +19,7 @@ router.get("/all", getAllProducts);
 router.get("/category/:category", getProductByCategory);
 router.get("/:id", getProduct);
 router.post("/create", veriyAdmin, uploadProductImages, createProduct);
-router.put("/edit/:id", veriyAdmin, editProduct);
+router.put("/edit/:id", veriyAdmin, uploadProductImages, editProduct);
 router.delete("/delete/:id", veriyAdmin, deleteProduct);
 
 export default router;

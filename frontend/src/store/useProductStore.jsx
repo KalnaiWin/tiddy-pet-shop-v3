@@ -7,6 +7,7 @@ export const useProductStore = create((set) => ({
   isLoadingProduct: false,
   isCreatingProduct: false,
   isDeleting: false,
+  isUpdating: false,
 
   getAllProduct: async () => {
     set({ isLoadingProduct: true });
@@ -18,6 +19,16 @@ export const useProductStore = create((set) => ({
       set({ allProduct: [] });
     } finally {
       set({ isLoadingProduct: false });
+    }
+  },
+
+  getProduct: async (productId) => {
+    try {
+      const res = await axiosInstance.get(`/product/${productId}`);
+      return res.data;
+    } catch (error) {
+      console.error("Error in creatong product frontend", error);
+      toast.error(error.response?.data?.message || "Sản phẩm không tồn tại.");
     }
   },
 
@@ -39,10 +50,10 @@ export const useProductStore = create((set) => ({
     }
   },
 
-  deleteProduct: async (idProduct) => {
+  deleteProduct: async (productId) => {
     set({ isDeleting: true });
     try {
-      await axiosInstance.delete(`product/delete/${idProduct}`);
+      await axiosInstance.delete(`product/delete/${productId}`);
       toast.success("Xóa sản phẩm thành công");
       await useProductStore.getState().getAllProduct();
     } catch (error) {
@@ -50,6 +61,20 @@ export const useProductStore = create((set) => ({
       toast.error(error.response?.data?.message || "Không thể xóa sản phẩm");
     } finally {
       set({ isCreatingProduct: false });
+    }
+  },
+
+  updateProduct: async (productId, data) => {
+    set({ isUpdating: true });
+    try {
+      await axiosInstance.put(`/product/edit/${productId}`, data);
+      toast.success("Thay đổi thành công");
+      await useProductStore.getState().getAllProduct();
+    } catch (error) {
+      console.error("Error in creatong product frontend", error);
+      toast.error(error.response?.data?.message || "Thay dổi không thành công");
+    } finally {
+      set({ isUpdating: false });
     }
   },
 }));
