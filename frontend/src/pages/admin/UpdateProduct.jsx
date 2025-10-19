@@ -1,17 +1,45 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowBigUp, CirclePlus, Loader2, XIcon } from "lucide-react";
 import { useProductStore } from "../../store/useProductStore";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
-export const CreateProduct = () => {
+export const UpdateProduct = () => {
+  const { id: productId } = useParams();
+
+  const { isUpdating, updateProduct, getProduct } = useProductStore();
   const navigate = useNavigate();
+  const [oldImages, setOldImages] = useState([]);
+  const [newImages, setNewImages] = useState([]);
+  const [oldTypeImages, setOldTypeImages] = useState([]);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const product = await getProduct(productId);
+      setFormData({
+        name: product.name,
+        description: product.description,
+        fromPrice: product.fromPrice,
+        toPrice: product.toPrice,
+        total: product.total,
+        status: product.status,
+        discount: product.discount,
+        type: product.type?.length
+          ? product.type
+          : [{ price: 0, types: "", image: null }],
+        category: product.category,
+      });
+      setOldImages(product.image || []);
+      setOldTypeImages(product.type?.map((t) => t.image) || []);
+    };
+
+    fetchProduct();
+  }, [productId]);
 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     fromPrice: 0,
     toPrice: 0,
-    image: [],
     total: "",
     status: "available",
     discount: "",
@@ -20,6 +48,7 @@ export const CreateProduct = () => {
         price: 0,
         types: "",
         image: null,
+        hasNewImage: false,
       },
     ],
     category: "Khác",
@@ -27,11 +56,9 @@ export const CreateProduct = () => {
 
   const fileInputRef = useRef(null);
 
-  const { isCreatingProduct, createProduct } = useProductStore();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prepare FormData
     const form = new FormData();
     form.append("name", formData.name);
     form.append("description", formData.description);
@@ -39,20 +66,35 @@ export const CreateProduct = () => {
     form.append("toPrice", formData.toPrice);
     form.append("total", formData.total);
     form.append("status", formData.status);
-    form.append("discount", formData.discount);
+    form.append("discount", formData.discount ? Number(formData.discount) : 0);
     form.append("category", formData.category);
 
-    formData.image.forEach((file) => {
+    // Append old images that weren't deleted
+    oldImages.forEach((img) => {
+      form.append("oldImages", img);
+    });
+
+    // Append new images
+    newImages.forEach((file) => {
       form.append("image", file);
     });
 
+    // Handle types
     formData.type.forEach((t, index) => {
       form.append(`type[${index}][price]`, t.price);
       form.append(`type[${index}][types]`, t.types);
-      form.append("typeImages", t.image);
+      form.append(`type[${index}][hasNewImage]`, t.hasNewImage);
+
+      if (t.hasNewImage && t.image) {
+        // New image - send file
+        form.append("typeImages", t.image);
+      } else if (!t.hasNewImage && oldTypeImages[index]) {
+        // Old image - send URL
+        form.append(`type[${index}][image]`, oldTypeImages[index]);
+      }
     });
 
-    const success = await createProduct(form);
+    const success = await updateProduct(productId, form);
 
     if (success) {
       setFormData({
@@ -60,13 +102,15 @@ export const CreateProduct = () => {
         description: "",
         fromPrice: 0,
         toPrice: 0,
-        image: [],
         total: "",
         status: "available",
         discount: "",
-        type: [{ price: 0, types: "", image: null }],
+        type: [{ price: 0, types: "", image: null, hasNewImage: false }],
         category: "Khác",
       });
+      setOldImages([]);
+      setNewImages([]);
+      setOldTypeImages([]);
 
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -78,10 +122,10 @@ export const CreateProduct = () => {
 
   return (
     <div className="w-full px-10 pb-10 bg-base-100">
-      <h1 className="text-3xl font-bold mt-5">Thêm sản phẩm mới tại đây</h1>
+      <h1 className="text-3xl font-bold mt-5">Chỉnh sửa sản phẩm tại đây</h1>
       <p className="">
-        Tạo thêm nhiều sản phẩm khiến cho cửa hàng trở nên đa dạng và phong phú
-        hơn
+        Thêm nhiều loại hàng mới hoặc thay đổi giá cả, tính năng của từng sản
+        phẩm.
       </p>
       <hr className="my-5" />
       <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
@@ -92,6 +136,7 @@ export const CreateProduct = () => {
           <textarea
             rows={2}
             type="text"
+            value={formData.name}
             placeholder="Nhập tên"
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className="bg-base-200 rounded-md border-2 border-base-content indent-1 p-1 focus:outline-base-300"
@@ -103,6 +148,7 @@ export const CreateProduct = () => {
           </label>
           <textarea
             type="text"
+            value={formData.description}
             placeholder="Nhập mô tả"
             rows={10}
             onChange={(e) =>
@@ -120,6 +166,7 @@ export const CreateProduct = () => {
               <label>Nhỏ nhất</label>
               <input
                 type="text"
+                value={formData.fromPrice}
                 inputMode="numeric"
                 placeholder="Nhập giá thấp nhất"
                 className="bg-base-200 rounded-md border-2 border-base-content indent-1 p-1 focus:outline-base-300"
@@ -137,6 +184,7 @@ export const CreateProduct = () => {
               </label>
               <input
                 type="text"
+                value={formData.toPrice}
                 inputMode="numeric"
                 placeholder="Nhập giá lớn nhất"
                 className="bg-base-200 rounded-md border-2 border-base-content indent-1 p-1 focus:outline-base-300"
@@ -157,6 +205,7 @@ export const CreateProduct = () => {
             </label>
             <input
               type="text"
+              value={formData.total}
               inputMode="numeric"
               className="bg-base-200 rounded-md border-2 border-base-content indent-1 p-1 focus:outline-base-300"
               onChange={(e) =>
@@ -183,6 +232,7 @@ export const CreateProduct = () => {
             <input
               type="text"
               inputMode="numeric"
+              value={formData.discount}
               onChange={(e) =>
                 setFormData({ ...formData, discount: e.target.value })
               }
@@ -217,6 +267,7 @@ export const CreateProduct = () => {
                 <label className="font-medium">Giá</label>
                 <input
                   type="number"
+                  value={t.price}
                   placeholder="Giá loại này"
                   onChange={(e) => {
                     const newTypes = [...formData.type];
@@ -236,16 +287,41 @@ export const CreateProduct = () => {
                     if (!file) return;
                     const newTypes = [...formData.type];
                     newTypes[index].image = file;
+                    newTypes[index].hasNewImage = true;
                     setFormData({ ...formData, type: newTypes });
                   }}
                   className="bg-base-200 rounded-md border-2 border-base-content indent-1 p-1 focus:outline-base-300"
                 />
-                {t.image && (
-                  <img
-                    src={URL.createObjectURL(t.image)}
-                    alt="preview"
-                    className="mt-2 size-20 object-cover rounded-md"
-                  />
+                {/* Show old image if exists and no new image */}
+                {oldTypeImages[index] && !t.hasNewImage && (
+                  <div className="relative">
+                    <img
+                      src={oldTypeImages[index]}
+                      alt={`old-type-${index}`}
+                      className="mt-2 size-20 object-cover rounded-md border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = [...oldTypeImages];
+                        updated[index] = null;
+                        setOldTypeImages(updated);
+                      }}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
+                    >
+                      <XIcon />
+                    </button>
+                  </div>
+                )}
+                {/* Show new image preview if uploaded */}
+                {t.hasNewImage && t.image && (
+                  <div className="relative">
+                    <img
+                      src={URL.createObjectURL(t.image)}
+                      alt={`new-type-${index}`}
+                      className="mt-2 size-20 object-cover rounded-md border"
+                    />
+                  </div>
                 )}
               </div>
               <button
@@ -253,6 +329,11 @@ export const CreateProduct = () => {
                 onClick={() => {
                   const newTypes = formData.type.filter((_, i) => i !== index);
                   setFormData({ ...formData, type: newTypes });
+                  // Also remove from oldTypeImages
+                  const updatedOldImages = oldTypeImages.filter(
+                    (_, i) => i !== index
+                  );
+                  setOldTypeImages(updatedOldImages);
                 }}
                 className="bg-red-500 text-white px-2 rounded cursor-pointer size-10 hover:opacity-80"
               >
@@ -266,7 +347,10 @@ export const CreateProduct = () => {
             onClick={() => {
               setFormData({
                 ...formData,
-                type: [...formData.type, { price: 0, types: "", image: null }],
+                type: [
+                  ...formData.type,
+                  { price: 0, types: "", image: null, hasNewImage: false },
+                ],
               });
             }}
             className="bg-base-content text-white p-2 rounded flex items-center cursor-pointer my-3 gap-1 hover:opacity-80"
@@ -286,7 +370,7 @@ export const CreateProduct = () => {
             }
             className="bg-base-200 rounded-md border-2 border-base-content indent-1 p-1 focus:outline-base-300"
           >
-            <option value="Chăm sóc sức khoẻ">Chăm sóc sức khoẻ</option>
+            <option value="Chăm sóc sức khỏe">Chăm sóc sức khỏe</option>
             <option value="Làm đẹp cho thú cưng">Làm đẹp cho thú cưng</option>
             <option value="Thức ăn cho thú cưng">Thức ăn cho thú cưng</option>
             <option value="Vệ sinh cho thú cưng">Vệ sinh cho thú cưng</option>
@@ -300,7 +384,7 @@ export const CreateProduct = () => {
             <p className="text-red-500">{"(*)"}</p>
           </label>
           <div className="w-full bg-white py-10 flex flex-col justify-end items-center gap-10 rounded-md border-3 border-dashed">
-            {formData.image.length === 0 ? (
+            {oldImages.length === 0 && newImages.length === 0 ? (
               <div className="flex flex-col gap-2 items-center">
                 <div className="size-20 flex justify-center items-center bg-base-content text-base-100 rounded-full">
                   <ArrowBigUp className="size-15" />
@@ -309,20 +393,39 @@ export const CreateProduct = () => {
               </div>
             ) : (
               <div className="grid grid-cols-8 gap-2">
-                {formData.image.map((img, index) => (
-                  <div className="relative" key={index}>
+                {/* Display old images */}
+                {oldImages.map((img, index) => (
+                  <div className="relative" key={`old-${index}`}>
                     <img
-                      src={URL.createObjectURL(img)}
-                      alt={`preview-${index}`}
+                      src={img}
+                      alt={`old-preview-${index}`}
                       className="w-24 h-24 object-cover rounded-md border"
                     />
                     <button
                       type="button"
                       onClick={() => {
-                        const updated = formData.image.filter(
-                          (_, i) => i !== index
-                        );
-                        setFormData({ ...formData, image: updated });
+                        const updated = oldImages.filter((_, i) => i !== index);
+                        setOldImages(updated);
+                      }}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-1 text-xs size-8 flex justify-center items-center"
+                    >
+                      <XIcon />
+                    </button>
+                  </div>
+                ))}
+                {/* Display new images */}
+                {newImages.map((img, index) => (
+                  <div className="relative" key={`new-${index}`}>
+                    <img
+                      src={URL.createObjectURL(img)}
+                      alt={`new-preview-${index}`}
+                      className="w-24 h-24 object-cover rounded-md border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const updated = newImages.filter((_, i) => i !== index);
+                        setNewImages(updated);
                       }}
                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full px-1 text-xs size-8 flex justify-center items-center"
                     >
@@ -339,21 +442,21 @@ export const CreateProduct = () => {
               multiple
               onChange={(e) => {
                 const fileArray = Array.from(e.target.files);
-                setFormData({ ...formData, image: fileArray });
+                setNewImages([...newImages, ...fileArray]);
                 e.target.value = null;
               }}
               className="bg-base-200 rounded-full border-2 border-base-content indent-1 p-2 focus:outline-base-300"
             />
           </div>
         </div>
-        {isCreatingProduct ? (
+        {isUpdating ? (
           <button
             className="py-4 w-full bg-base-300 rounded-xl font-bold text-2xl mt-10 cursor-pointer opacity-50"
             disabled
           >
             <div className="flex gap-1 items-center justify-center">
               <Loader2 className="animate-spin" />
-              <p>Đang thêm sản phẩm ...</p>
+              <p>Đang thay đổi ...</p>
             </div>
           </button>
         ) : (
@@ -361,7 +464,7 @@ export const CreateProduct = () => {
             className="py-4 w-full bg-base-300 rounded-xl font-bold text-2xl mt-10 hover:opacity-80 cursor-pointer"
             type="submit"
           >
-            <p>Thêm sản phẩm mới</p>
+            <p>Chỉnh sửa sản phẩm</p>
           </button>
         )}
       </form>

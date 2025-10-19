@@ -117,9 +117,14 @@ export const ProductManage = () => {
                     {new Date(product.createdAt).toLocaleDateString("vi-VN")}
                   </td>
                   <td className="py-6 px-2 text-center flex justify-end">
-                    <button className="text-blue-600 hover:underline mr-3 flex gap-1">
-                      <Edit />
-                      <p>Sửa</p>
+                    <button className="text-blue-600 hover:underline mr-3">
+                      <Link
+                        to={`/dashboard/product/edit/${product._id}`}
+                        className="flex gap-1"
+                      >
+                        <Edit />
+                        <p>Sửa</p>
+                      </Link>
                     </button>
                     <button
                       className="text-red-600 hover:underline flex gap-1"
@@ -132,22 +137,22 @@ export const ProductManage = () => {
                 </tr>
               ))}
             </tbody>
-            <div className="flex gap-2 justify-center mt-4">
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentPage(index + 1)}
-                  className={`px-3 py-1 rounded-md border ${
-                    currentPage === index + 1
-                      ? "bg-blue-500 text-white"
-                      : "bg-white hover:bg-gray-100"
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              ))}
-            </div>
           </table>
+          <div className="flex gap-2 justify-center mt-4">
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`px-3 py-1 rounded-md border ${
+                  currentPage === index + 1
+                    ? "bg-blue-500 text-white"
+                    : "bg-white hover:bg-gray-100"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

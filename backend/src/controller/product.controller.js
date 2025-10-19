@@ -80,6 +80,8 @@ export const createProduct = async (req, res) => {
     category,
   } = req.body;
 
+  console.log(req.body);
+
   try {
     if (!name || !description || !toPrice || !total) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -116,36 +118,36 @@ export const createProduct = async (req, res) => {
     }
 
     const parsedTypes = [];
-    if (req.body["type[0][price]"] || (req.body.type && req.body.type.length)) {
+
+    if (req.body["type[0][price]"] && typeImages.length > 0) {
       const typeUploadPromises = typeImages.map(async (file, i) => {
         const price = req.body[`type[${i}][price]`];
         const types = req.body[`type[${i}][types]`];
+
+        if (!price || !types) {
+          throw new Error(`Missing price or types for type at index ${i}`);
+        }
+
         const imageUrl = await uploadToCloudinary(file.buffer, "products/type");
 
         return {
-          price,
+          price: Number(price),
           types,
           image: imageUrl,
         };
       });
 
-      const typeUrlsFromBody = [];
-      if (req.body.type && typeof req.body.type === "object") {
-        for (const t of req.body.type) {
-          if (t.image) {
-            typeUrlsFromBody.push({
-              price: t.price,
-              types: t.types,
-              image: t.image,
-            });
-          }
-        }
-      }
+      parsedTypes.push(...(await Promise.all(typeUploadPromises)));
 
-      parsedTypes.push(
-        ...(await Promise.all(typeUploadPromises)),
-        ...typeUrlsFromBody
-      );
+      // ✅ Validate that we have the same number of types as images
+      const typeCount = Object.keys(req.body).filter(
+        (key) => key.startsWith("type[") && key.endsWith("][price]")
+      ).length;
+      if (parsedTypes.length !== typeCount) {
+        return res.status(400).json({
+          message: "Each product type must have an image",
+        });
+      }
     }
 
     const newProduct = new Product({
@@ -169,7 +171,7 @@ export const createProduct = async (req, res) => {
     });
   } catch (error) {
     console.log("Failed in creating product: ", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    res.status(500).json({ message: error.message || "Internal Server Error" });
   }
 };
 
@@ -191,56 +193,135 @@ export const deleteProduct = async (req, res) => {
 };
 
 export const editProduct = async (req, res) => {
-  const { id: productId } = req.params;
+  const { id } = req.params;
   const {
     name,
     description,
     fromPrice,
     toPrice,
-    image,
     total,
     status,
     discount,
-    type,
     category,
   } = req.body;
 
+  // console.log("FILES:", req.files);
+  // console.log("BODY:", req.body);
+
   try {
-    const product = await Product.findById(productId);
-    if (!product)
-      return res.status(404).json({ message: "This product is not exist" });
-
-    let updatedImages = product.image;
-
-    if (Array.isArray(image) && image.length > 0) {
-      updatedImages = await Promise.all(
-        image.map(async (img) => {
-          const result = await cloudinary.uploader.upload(img, {
-            folder: "products",
-          });
-          return result.secure_url;
-        })
-      );
+    const product = await Product.findById(id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    // Update info product
-    product.name = name ?? product.name;
-    product.description = description ?? product.description;
-    product.fromPrice = fromPrice ?? product.fromPrice;
-    product.toPrice = toPrice ?? product.toPrice;
-    product.image = updatedImages;
-    product.total = total ?? product.total;
-    product.status = status ?? product.status;
-    product.discount = discount ?? product.discount;
-    product.category = category ?? product.category;
-    if (Array.isArray(type) && type.length > 0) product.type = type;
-    product.category = category ?? product.category;
+    const uploadToCloudinary = (buffer, folder) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result.secure_url);
+          }
+        );
+        stream.end(buffer);
+      });
+    };
+
+    // ✅ Handle product images
+    const newImages = req.files?.image || [];
+    const oldImages = req.body.oldImages
+      ? Array.isArray(req.body.oldImages)
+        ? req.body.oldImages
+        : [req.body.oldImages]
+      : [];
+
+    let imageUrls = [...oldImages]; // Keep old images
+
+    if (newImages.length > 0) {
+      const uploadedUrls = await Promise.all(
+        newImages.map((file) => uploadToCloudinary(file.buffer, "products"))
+      );
+      imageUrls = [...imageUrls, ...uploadedUrls]; // Add new images
+    }
+
+    // ✅ Handle type images
+    const parsedTypes = [];
+    const typeImages = req.files?.typeImages || [];
+
+    if (req.body["type[0][price]"]) {
+      let typeImageIndex = 0;
+
+      const typeCount = Object.keys(req.body).filter((key) =>
+        key.match(/^type\[\d+\]\[price\]$/)
+      ).length;
+
+      for (let i = 0; i < typeCount; i++) {
+        const price = req.body[`type[${i}][price]`];
+        const types = req.body[`type[${i}][types]`];
+        const hasNewImage = req.body[`type[${i}][hasNewImage]`] === "true";
+        const oldImage = req.body[`type[${i}][image]`];
+
+        if (!price || !types) {
+          return res.status(400).json({
+            message: `Missing price or types for type at index ${i}`,
+          });
+        }
+
+        let imageUrl;
+
+        if (hasNewImage) {
+          // New image uploaded - must have corresponding file
+          if (typeImageIndex >= typeImages.length) {
+            return res.status(400).json({
+              message: `Missing image file for type at index ${i}`,
+            });
+          }
+          imageUrl = await uploadToCloudinary(
+            typeImages[typeImageIndex].buffer,
+            "products/type"
+          );
+          typeImageIndex++;
+        } else if (oldImage) {
+          // Keep old image URL
+          imageUrl = oldImage;
+        } else {
+          // No image provided at all
+          return res.status(400).json({
+            message: `Image is required for type at index ${i}`,
+          });
+        }
+
+        parsedTypes.push({
+          price: Number(price),
+          types,
+          image: imageUrl,
+        });
+      }
+    } else {
+      // No types in request, keep existing types
+      parsedTypes.push(...product.type);
+    }
+
+    // Update product fields
+    product.name = name || product.name;
+    product.description = description || product.description;
+    product.fromPrice = fromPrice !== undefined ? fromPrice : product.fromPrice;
+    product.toPrice = toPrice || product.toPrice;
+    product.image = imageUrls;
+    product.total = total || product.total;
+    product.status = status || product.status;
+    product.discount = discount !== undefined ? discount : product.discount;
+    product.type = parsedTypes.length > 0 ? parsedTypes : product.type;
+    product.category = category || product.category;
 
     await product.save();
 
-    return res.status(200).json({ message: "Updated product successfully" });
+    return res.status(200).json({
+      message: "Product updated successfully",
+      product,
+    });
   } catch (error) {
-    console.log("Failed in updating product: ", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.log("Failed in editing product: ", error);
+    res.status(500).json({ message: error.message || "Internal Server Error" });
   }
 };
