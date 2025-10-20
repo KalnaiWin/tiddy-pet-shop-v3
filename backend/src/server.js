@@ -5,6 +5,7 @@ import cors from "cors";
 
 import authRoute from "./routes/auth.route.js";
 import productRoute from "./routes/product.route.js";
+import userRoute from "./routes/user.route.js";
 import { connectDB } from "./lib/db.js";
 import { ENV } from "./lib/env.js";
 
@@ -28,6 +29,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoute);
 app.use("/api/product", productRoute);
+app.use("/api/user", userRoute);
 
 connectDB()
   .then(() => {

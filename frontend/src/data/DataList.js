@@ -8,8 +8,10 @@ import {
   Milk,
   MoreHorizontal,
   Package,
+  Shield,
   SoapDispenserDroplet,
   Truck,
+  User,
   Users,
 } from "lucide-react";
 
@@ -192,5 +194,26 @@ export const TotalCategory = [
     color: "#676767",
     bg: "bg-[#a5a5a5]",
     bg1: "text-[#000000]",
+  },
+];
+
+export const UserList = [
+  {
+    role: "admin",
+    bg: "bg-red-500",
+    text: "text-white",
+    icon: Shield,
+  },
+  {
+    role: "user",
+    bg: "bg-blue-500",
+    text: "text-white",
+    icon: User,
+  },
+  {
+    role: "shipper",
+    bg: "bg-emerald-500",
+    text: "text-white",
+    icon: Truck, 
   },
 ];
