@@ -21,14 +21,17 @@ export const selectRole = async (req, res) => {
       return res.status(404).json({ message: "This user is not found" });
     }
 
+    if (user.role === "admin") {
+      return res.status(400).json({ message: "Can not change role of admin" });
+    }
+
     user.role = role;
 
     await user.save();
 
-    return res.status(200).json({
-      message: "Role changed successfully",
-      user,
-    });
+    const allUsers = await User.find();
+
+    return res.status(200).json(allUsers);
   } catch (error) {
     console.error("Error change role user:", error);
     res.status(500).json({ message: "Internal Server Error", error });
@@ -64,18 +67,19 @@ export const addNewUser = async (req, res) => {
       role,
     });
 
-    if (newUser) {
-      const savedUser = await newUser.save();
-      genrateToken(savedUser._id, res);
-      res.status(201).json({
-        _id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        password: newUser.password,
-        profilePic: newUser.profilePic,
-        role: newUser.role,
-      });
-    }
+    const savedUser = await newUser.save();
+
+    res.status(201).json({
+      message: "User created successfully",
+      user: {
+        _id: savedUser._id,
+        name: savedUser.name,
+        email: savedUser.email,
+        role: savedUser.role,
+        profilePic: savedUser.profilePic,
+      },
+    });
+    
   } catch (error) {
     console.log("Error in creating user: ", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -89,6 +93,10 @@ export const deleteUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "This user is not found" });
     }
+
+    // if (user.role === "admin") {
+    //   return res.status(400).json({ message: "Can not delete admin" });
+    // }
 
     await User.findByIdAndDelete(userId);
 
