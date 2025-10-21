@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader, Lock, MailsIcon } from "lucide-react";
+import { Loader, Lock, MailsIcon, User } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { InfoShop, IntroduceList } from "../../data/DataList";
 
@@ -90,7 +90,7 @@ export const SignUpPage = () => {
           <div className="flex flex-col gap-2 my-4">
             <label htmlFor="">Tên tài khoản</label>
             <div className="relative w-full">
-              <MailsIcon className="text-base-content absolute top-2 left-2" />
+              <User className="text-base-content absolute top-2 left-2" />
               <input
                 type="text"
                 value={formData.name}
