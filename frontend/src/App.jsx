@@ -22,6 +22,7 @@ import { MessageCustomer } from "./pages/admin/MessageCustomer";
 import { Advertisement } from "./pages/admin/Advertisement";
 import { CreateProduct } from "./pages/admin/CreateProduct";
 import { UpdateProduct } from "./pages/admin/UpdateProduct";
+import { BanPage } from "./pages/admin/BanPage";
 
 const App = () => {
   const { checkAuth, isCheckingAuth, authUser } = useAuthStore();
@@ -31,6 +32,15 @@ const App = () => {
   }, [checkAuth]);
 
   if (isCheckingAuth) return <LoadingPage />;
+
+  if (authUser && authUser.banned) {
+    return (
+      <Routes>
+        <Route path="/ban" element={<BanPage />} />
+        <Route path="*" element={<Navigate to="/ban" replace />} />
+      </Routes>
+    );
+  }
 
   return (
     <div data-theme="caramellatte" className="h-screen bg-base-100">
