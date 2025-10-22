@@ -8,6 +8,7 @@ export const useUserStore = create((set, get) => ({
   isChangingRole: false,
   isDeletingAccount: false,
   isCreatingAccount: false,
+  isBanning: false,
 
   getAllUsers: async () => {
     set({ isGettingAllUsers: true });
@@ -53,7 +54,7 @@ export const useUserStore = create((set, get) => ({
   addNewAccount: async (data) => {
     set({ isCreatingAccount: true });
     try {
-      const res = await axiosInstance.post("/user/add", data);
+      await axiosInstance.post("/user/add", data);
       await get().getAllUsers();
       toast.success("Thêm tài khoản thành công");
     } catch (error) {
@@ -61,6 +62,30 @@ export const useUserStore = create((set, get) => ({
       toast.error("Thêm tài khoản thất bại");
     } finally {
       set({ isCreatingAccount: false });
+    }
+  },
+
+  banUser: async (userId, formData) => {
+    set({ isBanning: true });
+    try {
+      await axiosInstance.put(`user/ban/${userId}`, formData);
+      await get().getAllUsers();
+
+      if (formData.banned) {
+        toast.success("Ban tài khoản thành công.");
+      } else {
+        toast.success("Unban tài khoản thành công.");
+      }
+    } catch (error) {
+      console.error("Error in user frontend", error);
+
+      if (formData.banned) {
+        toast.error("Ban tài khoản thất bại.");
+      } else {
+        toast.error("Unban tài khoản thất bại.");
+      }
+    } finally {
+      set({ isBanning: false });
     }
   },
 }));

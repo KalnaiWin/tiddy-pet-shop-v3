@@ -79,7 +79,6 @@ export const addNewUser = async (req, res) => {
         profilePic: savedUser.profilePic,
       },
     });
-    
   } catch (error) {
     console.log("Error in creating user: ", error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -104,22 +103,6 @@ export const deleteUser = async (req, res) => {
   } catch (error) {
     console.log("Failed in deleting user: ", error);
     res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-export const viewUserProfile = async (req, res) => {
-  const { id: userId } = req.params;
-
-  try {
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "This user is not found" });
-    }
-
-    return res.status(200).json(user);
-  } catch (error) {
-    console.error("Error viewing user profile:", error);
-    res.status(500).json({ message: "Internal Server Error", error });
   }
 };
 

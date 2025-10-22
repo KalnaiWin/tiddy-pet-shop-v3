@@ -51,8 +51,9 @@ export const useAuthStore = create((set) => ({
   logout: async () => {
     try {
       await axiosInstance.post("/auth/logout");
-      toast.success("Đăng xuất thành công");
+      // toast.success("Đăng xuất thành công");
       set({ authUser: null });
+      window.location.href = "/login";
     } catch (error) {
       toast.error("Logout failed");
     }
